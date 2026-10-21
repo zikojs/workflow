@@ -185,7 +185,7 @@ importers:
   packages/scafy:
     dependencies:
       inquirer:
-        specifier: ^14.0.2
+        specifier: ^14.2.4
         version: 14.2.4
       picocolors:
         specifier: ^1.1.1
@@ -203,7 +203,7 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(supports-color@9.4.0)(yaml@2.9.1)
       ziko:
-        specifier: 'catalog:'
+        specifier: latest
         version: 2.0.0-beta.17.2
 
   packages/workflow:

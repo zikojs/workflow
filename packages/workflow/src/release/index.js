@@ -51,4 +51,4 @@ export async function release({
   }
 }
 
-release({ name : 'ziko'})
+// release({ name : 'ziko'})
