@@ -32,9 +32,9 @@ export async function release({
   let prepared = false;
 
   try {
-    const version = await rl.question(
-      "Enter release version (e.g. 1.0.0): "
-    );
+    const version = (
+      await rl.question("Enter release version (e.g. 1.0.0): ")
+    ).trim();
 
     if (!/^[0-9]+(\.[0-9]+)*(-[a-zA-Z0-9.-]+)?$/.test(version)) {
       throw new Error(`Invalid version: ${version}`);
@@ -44,7 +44,9 @@ export async function release({
 
     if (git("status", "--porcelain")) {
       git("add", ".");
-      git("commit", "-m", commitMessage(version));
+      if (git("diff", "--cached", "--name-only")) {
+        git("commit", "-m", commitMessage(version));
+      }
     } else {
       console.log("No changes to commit.");
     }
@@ -53,7 +55,10 @@ export async function release({
     prepared = true;
 
     git("add", ".");
-    git("commit", "-m", `chore: prepare templates for ${version}`);
+
+    if (git("diff", "--cached", "--name-only")) {
+      git("commit", "-m", `chore: prepare templates for ${version}`);
+    }
 
     git("tag", tag);
     git("push", remote, "HEAD");
