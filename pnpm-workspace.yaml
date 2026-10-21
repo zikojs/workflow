@@ -1,0 +1,5 @@
+packages:
+  - "packages/*"
+catalog:
+  ziko : latest
+  '@b9g/termdom' : latest

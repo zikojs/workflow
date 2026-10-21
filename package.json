@@ -1,6 +1,7 @@
 {
   "name": "workflow",
   "version": "1.0.0",
+  "private": true,
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -17,5 +18,9 @@
     }
   },
   "packageManager": "pnpm@12.14.0",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@b9g/termdom": "^0.2.3",
+    "ziko": "2.0.0-beta.17.2"
+  }
 }
