@@ -259,7 +259,7 @@ function preparePackage(packageFile, resolver, root) {
       root,
       packageFile
     )
-  ).mount(document.body);
+  );
 }
 
 export function prepareTemplates({
@@ -318,7 +318,7 @@ function restorePackage(packageFile, restoreMap, root) {
       root,
       packageFile
     )
-  ).mount(document.body);
+  );
 }
 
 export function restoreTemplates({
