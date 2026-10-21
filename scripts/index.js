@@ -1,4 +1,4 @@
-#!/usr/init/env node
+#!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
@@ -42,9 +42,8 @@ export async function release({
 
     const tag = `${prefix}${version}`;
 
-    // 1. Commit regular changes
     if (git("status", "--porcelain")) {
-      git("add", "-A");
+      git("add", ".");
       if (git("diff", "--cached", "--name-only")) {
         git("commit", "-m", commitMessage(version));
       }
@@ -52,12 +51,10 @@ export async function release({
       console.log("No changes to commit.");
     }
 
-    // 2. Prepare templates
     sync.prepare();
     prepared = true;
 
-    // 3. Stage template changes using -A (safely respects .gitignore)
-    git("add", "-A");
+    git("add", ".");
 
     if (git("diff", "--cached", "--name-only")) {
       git("commit", "-m", `chore: prepare templates for ${version}`);
@@ -68,8 +65,8 @@ export async function release({
     git("push", remote, tag);
 
     console.log(`Released tag: ${tag}`);
-    return tag;
 
+    return tag;
   } finally {
     try {
       if (prepared) {
