@@ -1,4 +1,5 @@
-#!/usr/init/env node
+#!/usr/bin/env node
+
 import { execFileSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
@@ -55,11 +56,21 @@ export async function release({
     sync.prepare();
     prepared = true;
 
-    // Use -f (force) in case templates are matched by .gitignore
-    git("add", "-f", ".");
+    // 3. Stage ONLY the specific scaffolder template directories (safely avoiding node_modules)
+    for (const pattern of SCAFFOLDERS) {
+      // Convert glob pattern like "scafy/templates/*" to the root directory path "scafy/templates"
+      const targetDir = pattern.replace(/\/\*$/, "");
+      try {
+        git("add", targetDir);
+      } catch (e) {
+        // Ignore if path doesn't exist
+      }
+    }
 
     if (git("diff", "--cached", "--name-only")) {
       git("commit", "-m", `chore: prepare templates for ${version}`);
+    } else {
+      console.log("No template changes to commit.");
     }
 
     git("tag", tag);
