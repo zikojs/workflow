@@ -1,0 +1,31 @@
+{
+  "name": "scafy",
+  "version": "1.2.1",
+  "description": "An extensible, framework-agnostic engine for building custom create-* CLI scaffolding tools.",
+  "keywords": [
+    "scaffolder",
+    "cli",
+    "prompt"
+  ],
+  "homepage": "https://github.com/zikojs/workflow#readme",
+  "bugs": {
+    "url": "https://github.com/zikojs/workflow/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zikojs/workflow.git",
+    "directory": "packages/scafy"
+  },
+  "license": "MIT",
+  "author": "zakaria elalaoui",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "inquirer": "^14.2.4",
+    "picocolors": "^1.1.1",
+    "ziko": "catalog:"
+  }
+}

@@ -1,0 +1,5 @@
+1.1.0 : 
+    - API Consolidation (presets): Replaced the separate templates object and projectTypes array with a single, unified presets array.
+    - Property Rename: Renamed configuration field projectTypes to presets across all entrypoints and factory methods.
+1.2.0 : 
+    - Ignore node_modules in starters 
