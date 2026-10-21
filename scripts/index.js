@@ -3,11 +3,17 @@
 import { execFileSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { createTemplateSync } from "@zikojs/workflow";
+
+import {
+  createTemplateSync
+} from '@zikojs/workflow'
 
 const SCAFFOLDERS = [
   "scafy/templates/*",
+  // "create-ufbr/templates/*",
 ];
+
+const sync = createTemplateSync(SCAFFOLDERS);
 
 export async function release({
   name,
@@ -19,7 +25,6 @@ export async function release({
     throw new Error("Release name is required.");
   }
 
-  const sync = createTemplateSync(SCAFFOLDERS);
   const rl = createInterface({ input: stdin, output: stdout });
 
   function git(...args) {
@@ -29,12 +34,10 @@ export async function release({
     }).trim();
   }
 
-  let prepared = false;
-
   try {
-    const version = (
-      await rl.question("Enter release version (e.g. 1.0.0): ")
-    ).trim();
+    const version = await rl.question(
+      "Enter release version (e.g. 1.0.0 or 1.0.0.1): "
+    );
 
     if (!/^[0-9]+(\.[0-9]+)*(-[a-zA-Z0-9.-]+)?$/.test(version)) {
       throw new Error(`Invalid version: ${version}`);
@@ -42,40 +45,24 @@ export async function release({
 
     const tag = `${prefix}${version}`;
 
-    if (git("status", "--porcelain")) {
-      git("add", ".");
-      if (git("diff", "--cached", "--name-only")) {
-        git("commit", "-m", commitMessage(version));
-      }
-    } else {
+    if (!git("status", "--porcelain")) {
       console.log("No changes to commit.");
+    } else {
+      git("add", ".");
+      git("commit", "-m", commitMessage(version));
     }
-
-    sync.prepare();
-    prepared = true;
-
-    git("add", "-A");
-
-    if (git("diff", "--cached", "--name-only")) {
-      git("commit", "-m", `chore: prepare templates for ${version}`);
-    }
-
+    await sync.prepare()
     git("tag", tag);
     git("push", remote, "HEAD");
     git("push", remote, tag);
+    await sync.restore()
 
     console.log(`Released tag: ${tag}`);
 
     return tag;
   } finally {
-    try {
-      if (prepared) {
-        sync.restore();
-      }
-    } finally {
-      rl.close();
-    }
+    rl.close();
   }
 }
 
-release({ name: "ziko" });
+release({ name : 'workflow'})
