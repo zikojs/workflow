@@ -1,19 +1,12 @@
-#!/usr/bin/env node
-
+#!/usr/init/env node
 import { execFileSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-
-import {
-  createTemplateSync
-} from '@zikojs/workflow';
+import { createTemplateSync } from "@zikojs/workflow";
 
 const SCAFFOLDERS = [
   "scafy/templates/*",
-  // "create-ufbr/templates/*",
 ];
-
-const sync = createTemplateSync(SCAFFOLDERS);
 
 export async function release({
   name,
@@ -25,6 +18,7 @@ export async function release({
     throw new Error("Release name is required.");
   }
 
+  const sync = createTemplateSync(SCAFFOLDERS);
   const rl = createInterface({ input: stdin, output: stdout });
 
   function git(...args) {
@@ -34,13 +28,12 @@ export async function release({
     }).trim();
   }
 
-  let synced = false;
-  let tempCommitted = false;
+  let prepared = false;
 
   try {
-    const version = await rl.question(
-      "Enter release version (e.g. 1.0.0 or 1.0.0.1): "
-    );
+    const version = (
+      await rl.question("Enter release version (e.g. 1.0.0): ")
+    ).trim();
 
     if (!/^[0-9]+(\.[0-9]+)*(-[a-zA-Z0-9.-]+)?$/.test(version)) {
       throw new Error(`Invalid version: ${version}`);
@@ -48,61 +41,43 @@ export async function release({
 
     const tag = `${prefix}${version}`;
 
-    // 1. Commit any normal user changes first on the current branch
-    if (!git("status", "--porcelain")) {
-      console.log("No changes to commit.");
-    } else {
-      git("add", ".");
-      git("commit", "-m", commitMessage(version));
-    }
-
-    // 2. Prepare templates in the working tree
-    console.log("Preparing templates for release tag...");
-    await sync.prepare();
-    synced = true;
-
-    // 3. Only create a temporary commit if sync actually produced changes
+    // 1. Commit regular changes
     if (git("status", "--porcelain")) {
       git("add", ".");
-      git("commit", "-m", `temp: template sync for ${version}`);
-      tempCommitted = true;
+      if (git("diff", "--cached", "--name-only")) {
+        git("commit", "-m", commitMessage(version));
+      }
     } else {
-      console.log("Templates produced no changes to commit; tagging current HEAD.");
+      console.log("No changes to commit.");
     }
 
-    // 4. Tag the release commit
+    // 2. Prepare templates
+    sync.prepare();
+    prepared = true;
+
+    // Use -f (force) in case templates are matched by .gitignore
+    git("add", "-f", ".");
+
+    if (git("diff", "--cached", "--name-only")) {
+      git("commit", "-m", `chore: prepare templates for ${version}`);
+    }
+
     git("tag", tag);
-
-    // 5. Push the tag and push HEAD to the remote
-    console.log(`Pushing release tag ${tag} and branch...`);
-    git("push", remote, tag);
     git("push", remote, "HEAD");
+    git("push", remote, tag);
 
-    // 6. If we made a temporary commit, step back one commit locally to keep history clean
-    if (tempCommitted) {
-      git("reset", "--mixed", "HEAD~1");
-    }
-
-    // 7. Restore templates back to your clean working state
-    console.log("Restoring templates...");
-    await sync.restore();
-    synced = false;
-
-    console.log(`Successfully released tag: ${tag}`);
+    console.log(`Released tag: ${tag}`);
     return tag;
 
   } finally {
-    // Fallback cleanup if something errors out midway
-    if (synced) {
-      try {
-        console.log("Cleaning up/restoring templates...");
-        await sync.restore();
-      } catch (restoreError) {
-        console.error("Failed to restore templates:", restoreError);
+    try {
+      if (prepared) {
+        sync.restore();
       }
+    } finally {
+      rl.close();
     }
-    rl.close();
   }
 }
 
-release({ name: 'workflow' });
+release({ name: "workflow" });
