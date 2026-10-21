@@ -32,13 +32,15 @@ export async function release({
   let prepared = false;
 
   try {
-    const version = (
-      await rl.question("Enter release version (e.g. 1.0.0): ")
-    ).trim();
+    // const version = (
+    //   await rl.question("Enter release version (e.g. 1.0.0): ")
+    // ).trim();
 
-    if (!/^[0-9]+(\.[0-9]+)*(-[a-zA-Z0-9.-]+)?$/.test(version)) {
-      throw new Error(`Invalid version: ${version}`);
-    }
+    // if (!/^[0-9]+(\.[0-9]+)*(-[a-zA-Z0-9.-]+)?$/.test(version)) {
+    //   throw new Error(`Invalid version: ${version}`);
+    // }
+
+    const version = '0.0.7'
 
     const tag = `${prefix}${version}`;
 
