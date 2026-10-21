@@ -1,74 +1,72 @@
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { spawn } from "node:child_process";
-
 import { createTemplateSync } from "@zikojs/workflow";
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const root = path.resolve(__dirname, "..");
 
 const SCAFFOLDERS = [
   "scafy/templates/*",
   // "create-ufbr/templates/*",
 ];
 
-const sync = createTemplateSync(root, SCAFFOLDERS);
+const sync = createTemplateSync(SCAFFOLDERS);
 
-const [command, ...args] = process.argv.slice(2);
+sync.prepare()
+// Between 
+setTimeout(()=> sync.restore(), 1000)
 
-if (!command) {
-  console.error("Usage: node scripts/sync.js <command> [...args]");
-  process.exitCode = 1;
-} else {
-  let restored = false;
 
-  function restore() {
-    if (restored) return;
-    restored = true;
-    sync.restore();
-  }
+// const [command, ...args] = process.argv.slice(2);
 
-  try {
-    sync.prepare();
+// if (!command) {
+//   console.error("Usage: node scripts/sync.js <command> [...args]");
+//   process.exitCode = 1;
+// } else {
+//   let restored = false;
 
-    const child = spawn(command, args, {
-      cwd: root,
-      stdio: "inherit",
-      shell: process.platform === "win32",
-    });
+//   function restore() {
+//     if (restored) return;
+//     restored = true;
+//     sync.restore();
+//   }
 
-    child.on("error", (error) => {
-      console.error(error);
+//   try {
+//     sync.prepare();
 
-      try {
-        // restore();
-      } catch (restoreError) {
-        console.error(restoreError);
-      }
+//     const child = spawn(command, args, {
+//       cwd: root,
+//       stdio: "inherit",
+//       shell: process.platform === "win32",
+//     });
 
-      process.exitCode = 1;
-    });
+//     child.on("error", (error) => {
+//       console.error(error);
 
-    child.on("close", (code) => {
-      try {
-        // restore();
-      } catch (error) {
-        console.error(error);
-        process.exitCode = 1;
-        return;
-      }
+//       try {
+//         // restore();
+//       } catch (restoreError) {
+//         console.error(restoreError);
+//       }
 
-      process.exitCode = code ?? 1;
-    });
-  } catch (error) {
-    console.error(error);
+//       process.exitCode = 1;
+//     });
 
-    try {
-    //   restore();
-    } catch (restoreError) {
-      console.error(restoreError);
-    }
+//     child.on("close", (code) => {
+//       try {
+//         // restore();
+//       } catch (error) {
+//         console.error(error);
+//         process.exitCode = 1;
+//         return;
+//       }
 
-    process.exitCode = 1;
-  }
-}
+//       process.exitCode = code ?? 1;
+//     });
+//   } catch (error) {
+//     console.error(error);
+
+//     try {
+//     //   restore();
+//     } catch (restoreError) {
+//       console.error(restoreError);
+//     }
+
+//     process.exitCode = 1;
+//   }
+// }
