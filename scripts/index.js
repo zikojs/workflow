@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/init/env node
 
 import { execFileSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
@@ -44,7 +44,7 @@ export async function release({
 
     // 1. Commit regular changes
     if (git("status", "--porcelain")) {
-      git("add", ".");
+      git("add", "-A");
       if (git("diff", "--cached", "--name-only")) {
         git("commit", "-m", commitMessage(version));
       }
@@ -56,21 +56,11 @@ export async function release({
     sync.prepare();
     prepared = true;
 
-    // 3. Stage ONLY the specific scaffolder template directories (safely avoiding node_modules)
-    for (const pattern of SCAFFOLDERS) {
-      // Convert glob pattern like "scafy/templates/*" to the root directory path "scafy/templates"
-      const targetDir = pattern.replace(/\/\*$/, "");
-      try {
-        git("add", targetDir);
-      } catch (e) {
-        // Ignore if path doesn't exist
-      }
-    }
+    // 3. Stage template changes using -A (safely respects .gitignore)
+    git("add", "-A");
 
     if (git("diff", "--cached", "--name-only")) {
       git("commit", "-m", `chore: prepare templates for ${version}`);
-    } else {
-      console.log("No template changes to commit.");
     }
 
     git("tag", tag);
