@@ -35,6 +35,7 @@ export async function release({
   }
 
   let synced = false;
+  let tempCommitted = false;
 
   try {
     const version = await rl.question(
@@ -55,36 +56,43 @@ export async function release({
       git("commit", "-m", commitMessage(version));
     }
 
-    // 2. Prepare templates in the working tree (modifies files for the tag/release)
+    // 2. Prepare templates in the working tree
     console.log("Preparing templates for release tag...");
     await sync.prepare();
     synced = true;
 
-    // 3. Create a temporary commit containing the generated templates
-    git("add", ".");
-    git("commit", "-m", `temp: template sync for ${version}`);
+    // 3. Only create a temporary commit if sync actually produced changes
+    if (git("status", "--porcelain")) {
+      git("add", ".");
+      git("commit", "-m", `temp: template sync for ${version}`);
+      tempCommitted = true;
+    } else {
+      console.log("Templates produced no changes to commit; tagging current HEAD.");
+    }
 
-    // 4. Tag this temporary release commit
+    // 4. Tag the release commit
     git("tag", tag);
 
-    // 5. Push the tag and push HEAD (the temporary commit) to the remote
+    // 5. Push the tag and push HEAD to the remote
     console.log(`Pushing release tag ${tag} and branch...`);
     git("push", remote, tag);
     git("push", remote, "HEAD");
 
-    // 6. Step back one commit locally so your main branch history is untouched
-    git("reset", "--mixed", "HEAD~1");
+    // 6. If we made a temporary commit, step back one commit locally to keep history clean
+    if (tempCommitted) {
+      git("reset", "--mixed", "HEAD~1");
+    }
 
     // 7. Restore templates back to your clean working state
     console.log("Restoring templates...");
     await sync.restore();
     synced = false;
 
-    console.log(`Successfully released tag: ${tag} (with templates included in the tag)`);
+    console.log(`Successfully released tag: ${tag}`);
     return tag;
 
   } finally {
-    // Fallback cleanup if something unexpected errors out midway
+    // Fallback cleanup if something errors out midway
     if (synced) {
       try {
         console.log("Cleaning up/restoring templates...");
