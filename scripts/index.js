@@ -54,7 +54,7 @@ export async function release({
     sync.prepare();
     prepared = true;
 
-    git("add", ".");
+    git("add", "-A");
 
     if (git("diff", "--cached", "--name-only")) {
       git("commit", "-m", `chore: prepare templates for ${version}`);
