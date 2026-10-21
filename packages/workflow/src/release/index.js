@@ -1,6 +1,19 @@
+#!/usr/bin/env node
+
 import { execFileSync } from "node:child_process";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
+
+// import {
+//   createTemplateSync
+// } from '../pnpm-sync-templates/index.js'
+
+// const SCAFFOLDERS = [
+//   "scafy/templates/*",
+//   // "create-ufbr/templates/*",
+// ];
+
+// const sync = createTemplateSync(SCAFFOLDERS);
 
 export async function release({
   name,
@@ -38,10 +51,11 @@ export async function release({
       git("add", ".");
       git("commit", "-m", commitMessage(version));
     }
-
+    // await sync.prepare()
     git("tag", tag);
     git("push", remote, "HEAD");
     git("push", remote, tag);
+    // await sync.restore()
 
     console.log(`Released tag: ${tag}`);
 

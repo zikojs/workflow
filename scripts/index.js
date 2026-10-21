@@ -1,72 +1,76 @@
+#!/usr/bin/env node
+
+import { execFileSync } from "node:child_process";
+import { createInterface } from "node:readline/promises";
+import { stdin, stdout } from "node:process";
 import { createTemplateSync } from "@zikojs/workflow";
 
 const SCAFFOLDERS = [
   "scafy/templates/*",
-  // "create-ufbr/templates/*",
 ];
 
-const sync = createTemplateSync(SCAFFOLDERS);
+export async function release({
+  name,
+  remote = "origin",
+  prefix = `${name}-v`,
+  commitMessage = (version) => `chore: release ${version}`,
+} = {}) {
+  if (!name) {
+    throw new Error("Release name is required.");
+  }
 
-sync.prepare()
-// Between 
-setTimeout(()=> sync.restore(), 1000)
+  const sync = createTemplateSync(SCAFFOLDERS);
+  const rl = createInterface({ input: stdin, output: stdout });
 
+  function git(...args) {
+    return execFileSync("git", args, {
+      encoding: "utf8",
+      stdio: ["inherit", "pipe", "inherit"],
+    }).trim();
+  }
 
-// const [command, ...args] = process.argv.slice(2);
+  let prepared = false;
 
-// if (!command) {
-//   console.error("Usage: node scripts/sync.js <command> [...args]");
-//   process.exitCode = 1;
-// } else {
-//   let restored = false;
+  try {
+    const version = await rl.question(
+      "Enter release version (e.g. 1.0.0): "
+    );
 
-//   function restore() {
-//     if (restored) return;
-//     restored = true;
-//     sync.restore();
-//   }
+    if (!/^[0-9]+(\.[0-9]+)*(-[a-zA-Z0-9.-]+)?$/.test(version)) {
+      throw new Error(`Invalid version: ${version}`);
+    }
 
-//   try {
-//     sync.prepare();
+    const tag = `${prefix}${version}`;
 
-//     const child = spawn(command, args, {
-//       cwd: root,
-//       stdio: "inherit",
-//       shell: process.platform === "win32",
-//     });
+    if (git("status", "--porcelain")) {
+      git("add", ".");
+      git("commit", "-m", commitMessage(version));
+    } else {
+      console.log("No changes to commit.");
+    }
 
-//     child.on("error", (error) => {
-//       console.error(error);
+    sync.prepare();
+    prepared = true;
 
-//       try {
-//         // restore();
-//       } catch (restoreError) {
-//         console.error(restoreError);
-//       }
+    git("add", ".");
+    git("commit", "-m", `chore: prepare templates for ${version}`);
 
-//       process.exitCode = 1;
-//     });
+    git("tag", tag);
+    git("push", remote, "HEAD");
+    git("push", remote, tag);
 
-//     child.on("close", (code) => {
-//       try {
-//         // restore();
-//       } catch (error) {
-//         console.error(error);
-//         process.exitCode = 1;
-//         return;
-//       }
+    console.log(`Released tag: ${tag}`);
 
-//       process.exitCode = code ?? 1;
-//     });
-//   } catch (error) {
-//     console.error(error);
+    return tag;
+  } finally {
+    try {
+      if (prepared) {
+        sync.restore();
+      }
+    } finally {
+      rl.close();
+    }
+  }
+}
 
-//     try {
-//     //   restore();
-//     } catch (restoreError) {
-//       console.error(restoreError);
-//     }
-
-//     process.exitCode = 1;
-//   }
-// }
+release({ name: "ziko" });

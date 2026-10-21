@@ -1,22 +1,22 @@
-import { tags } from "ziko/dom";
-const {
-    div, h1, span, h2, section, pre, table, tbody, tr, td
-} = tags
+const colors = {
+  green: "\x1b[32m",
+  blue: "\x1b[34m",
+  yellow: "\x1b[33m",
+  reset: "\x1b[0m",
+};
 
-export function Log(pckg){
-    return div(
-        pckg
-    ).style({color : "green"})
+export function Log(pckg) {
+  console.log(`${colors.green}${pckg}${colors.reset}`);
 }
-export function PrepreLog(pckg){
-    return div(
-        span('✓ Prepared : ').style({color : 'green'}),
-        span(pckg).style({color : 'blue'})
-    )
+
+export function PrepreLog(pckg) {
+  console.log(
+    `${colors.green}✓ Prepared : ${colors.reset}${colors.blue}${pckg}${colors.reset}`
+  );
 }
-export function RestoreLog(pckg){
-    return div(
-        span('✓ Restored : ').style({color : 'gold'}),
-        span(pckg).style({color : 'blue'})
-    )
+
+export function RestoreLog(pckg) {
+  console.log(
+    `${colors.yellow}✓ Restored : ${colors.reset}${colors.blue}${pckg}${colors.reset}`
+  );
 }

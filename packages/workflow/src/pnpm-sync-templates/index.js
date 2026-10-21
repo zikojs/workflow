@@ -2,18 +2,18 @@ import fs from "node:fs";
 import path from "node:path";
 
 
-import { TermDOM } from "@b9g/termdom";
+// import { TermDOM } from "@b9g/termdom";
 
 import {
   PrepreLog,
   RestoreLog
 } from "./components/Log.js";
 
-const term = new TermDOM();
-term.attach();
-const { document, window } = term;
-globalThis.document = document;
-globalThis.window = window;
+// const term = new TermDOM();
+// term.attach();
+// const { document, window } = term;
+// globalThis.document = document;
+// globalThis.window = window;
 
 const DEPENDENCY_SECTIONS = [
   "dependencies",
