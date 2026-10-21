@@ -1,6 +1,7 @@
 packages:
   - "packages/*"
   - "packages/scafy/templates/*"
+  - "scripts"
 catalog:
   ziko : latest
   '@b9g/termdom' : latest
