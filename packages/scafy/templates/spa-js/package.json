@@ -13,6 +13,6 @@
   "dependencies": {
     "@zikojs/mdx": "^0.1.0",
     "@zikojs/server": "^0.1.0",
-    "ziko": "latest"
+    "ziko": "catalog:"
   }
 }
