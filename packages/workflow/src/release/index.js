@@ -50,5 +50,3 @@ export async function release({
     rl.close();
   }
 }
-
-release({ name : 'ziko'})
