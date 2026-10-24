@@ -1,11 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 
-
 import {
   PrepreLog,
   RestoreLog
 } from "./components/Log.js";
+
 
 const DEPENDENCY_SECTIONS = [
   "dependencies",
@@ -18,14 +18,13 @@ const IGNORED_DIRECTORIES = new Set([
   ".git",
 ]);
 
-export function readWorkspace() {
-  const root = process.cwd();
+export function readWorkspace(root) {
   const file = path.join(root, "pnpm-workspace.yaml");
-
   if (!fs.existsSync(file)) {
-    throw new Error(`pnpm-workspace.yaml not found: ${file}`);
+    throw new Error(
+      `pnpm-workspace.yaml not found: ${file}`
+    );
   }
-
   return {
     root,
     file,
@@ -73,32 +72,22 @@ export function resolveCatalog(name, catalog) {
   return version;
 }
 
-export function readWorkspacePackages() {
-  const root = process.cwd();
+export function readWorkspacePackages(root) {
   const packages = new Map();
-
   function scan(dir) {
     if (!fs.existsSync(dir)) return;
-
     for (const entry of fs.readdirSync(dir, {
       withFileTypes: true,
     })) {
-      if (
-        entry.isDirectory() &&
-        IGNORED_DIRECTORIES.has(entry.name)
-      ) continue;
-
+      if ( entry.isDirectory() && IGNORED_DIRECTORIES.has(entry.name)) continue;
       const entryPath = path.join(dir, entry.name);
       if (!entry.isDirectory()) continue;
-
       const packageFile = path.join(entryPath, "package.json");
-
       if (fs.existsSync(packageFile)) {
         try {
           const pkg = JSON.parse(
             fs.readFileSync(packageFile, "utf8")
           );
-
           if (pkg.name && pkg.version) {
             packages.set(pkg.name, {
               name: pkg.name,
@@ -110,11 +99,9 @@ export function readWorkspacePackages() {
           // Ignore invalid package.json
         }
       }
-
       scan(entryPath);
     }
   }
-
   scan(root);
   return packages;
 }
@@ -345,23 +332,23 @@ export function restoreTemplates({
     );
   }
 }
-export function createTemplateSync(templates) {
-  const root = process.cwd();
-  const workspace = readWorkspace();
+export function createTemplateSync(root, templates) {
+  const workspace = readWorkspace(root);
   const catalog = readCatalog(workspace);
-  const workspacePackages = readWorkspacePackages();
-
+  const workspacePackages = readWorkspacePackages(root);
   const resolver = (name, version) =>
-    resolvePackage(name, version, {
-      catalog,
-      workspacePackages,
-    });
-
+    resolvePackage(
+      name,
+      version,
+      {
+        catalog,
+        workspacePackages,
+      }
+    );
   return {
     workspace,
     catalog,
     workspacePackages,
-
     prepare() {
       return prepareTemplates({
         root,
@@ -369,7 +356,6 @@ export function createTemplateSync(templates) {
         resolver,
       });
     },
-
     restore() {
       return restoreTemplates({
         root,
