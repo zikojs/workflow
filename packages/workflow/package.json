@@ -1,6 +1,6 @@
 {
   "name": "@zikojs/workflow",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "zikojs workflow",
   "type": "module",
   "keywords": [
@@ -34,8 +34,7 @@
   "license": "MIT",
   "author": "zakaria elalaoui",
   "dependencies": {
-    "ziko": "catalog:",
-    "@b9g/termdom": "catalog:"
+    "ziko": "catalog:"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

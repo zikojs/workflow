@@ -164,9 +164,6 @@ settings:
 
 catalogs:
   default:
-    '@b9g/termdom':
-      specifier: latest
-      version: 0.2.3
     ziko:
       specifier: latest
       version: 2.0.0-beta.17.2
@@ -203,14 +200,11 @@ importers:
         specifier: ^0.1.0
         version: 0.1.0(supports-color@9.4.0)(yaml@2.9.1)
       ziko:
-        specifier: latest
+        specifier: 'catalog:'
         version: 2.0.0-beta.17.2
 
   packages/workflow:
     dependencies:
-      '@b9g/termdom':
-        specifier: 'catalog:'
-        version: 0.2.3
       ziko:
         specifier: 'catalog:'
         version: 2.0.0-beta.17.2
